@@ -21,7 +21,9 @@ pub fn part1() -> i64 {
 
     let mut index = 0 as usize;
     loop {
-        if input[index] == 99 { break; }
+        if input[index] == 99 {
+            break;
+        }
         let opcode = Opcode::from(input[index]);
         let (operand_pos1, operand_pos2) = (input[index + 1] as usize, input[index + 2] as usize);
         let output_pos = input[index + 3] as usize;
@@ -38,7 +40,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-    const OUTPUT_VALUE: i64 = 19690720;
+    const OUTPUT_VALUE: i64 = 19_690_720;
 
     let input = parse_input();
 
@@ -57,7 +59,8 @@ pub fn part2() -> i64 {
 }
 
 fn parse_input() -> Vec<i64> {
-    include_str!("inputs/day2.txt").trim()
+    include_str!("inputs/day2.txt")
+        .trim()
         .split(',')
         .map(|input| input.parse::<i64>().expect("unable to parse"))
         .collect::<Vec<i64>>()
@@ -66,7 +69,9 @@ fn parse_input() -> Vec<i64> {
 fn run_tape(mut tape: Vec<i64>) -> Vec<i64> {
     let mut index = 0 as usize;
     loop {
-        if tape[index] == 99 { break; }
+        if tape[index] == 99 {
+            break;
+        }
         let opcode = Opcode::from(tape[index]);
         let (operand_pos1, operand_pos2) = (tape[index + 1] as usize, tape[index + 2] as usize);
         let output_pos = tape[index + 3] as usize;

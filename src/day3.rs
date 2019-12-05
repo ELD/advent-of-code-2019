@@ -80,7 +80,7 @@ fn insert_coords(
     direction: Direction,
     distance: i64,
 ) -> (i64, i64) {
-    (1..=distance).into_iter().for_each(|_| {
+    (1..=distance).for_each(|_| {
         match direction {
             Direction::Left => last_coord.0 -= 1,
             Direction::Up => last_coord.1 += 1,
@@ -94,7 +94,7 @@ fn insert_coords(
     last_coord
 }
 
-fn compute_distance_to(point: (i64, i64), dir_list: &Vec<&str>) -> i64 {
+fn compute_distance_to(point: (i64, i64), dir_list: &[&str]) -> i64 {
     let mut cursor = (0, 0);
     let mut distance = 0;
 
@@ -106,7 +106,7 @@ fn compute_distance_to(point: (i64, i64), dir_list: &Vec<&str>) -> i64 {
         let direction = Direction::from(dir.chars().nth(0).unwrap());
         let dist = dir[1..].parse::<i64>().unwrap();
 
-        (1..=dist).into_iter().for_each(|_| {
+        (1..=dist).for_each(|_| {
             if cursor == point {
                 return;
             }
