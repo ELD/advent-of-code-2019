@@ -80,15 +80,8 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
 
         match opcode {
             Opcode::Add => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
-
-                let param2 = match param2_mode {
-                    ParameterMode::Immediate => tape[pc + 2],
-                    ParameterMode::Position => tape[tape[pc + 2] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
+                let param2 = get_param(pc, &tape, param2_mode, 2);
 
                 match output_mode {
                     ParameterMode::Immediate => tape[pc + 3] = param1 + param2,
@@ -99,15 +92,8 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
                 }
             }
             Opcode::Mul => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
-
-                let param2 = match param2_mode {
-                    ParameterMode::Immediate => tape[pc + 2],
-                    ParameterMode::Position => tape[tape[pc + 2] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
+                let param2 = get_param(pc, &tape, param2_mode, 2);
 
                 match output_mode {
                     ParameterMode::Immediate => tape[pc + 3] = param1 * param2,
@@ -118,20 +104,17 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
                 }
             }
             Opcode::Output => {
-                let param1 = tape[pc + 1] as usize;
+                let param1 = get_param(pc, &tape, ParameterMode::Immediate, 1) as usize;
 
                 println!("{}", tape[param1]);
             }
             Opcode::Save => {
-                let param1 = tape[pc + 1] as usize;
+                let param1 = get_param(pc, &tape, ParameterMode::Immediate, 1) as usize;
 
                 tape[param1] = input;
             }
             Opcode::JIT => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
 
                 if param1 != 0 {
                     pc = match param2_mode {
@@ -143,10 +126,7 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
                 }
             }
             Opcode::JIF => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
 
                 if param1 == 0 {
                     pc = match param2_mode {
@@ -158,15 +138,8 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
                 }
             }
             Opcode::LT => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
-
-                let param2 = match param2_mode {
-                    ParameterMode::Immediate => tape[pc + 2],
-                    ParameterMode::Position => tape[tape[pc + 2] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
+                let param2 = get_param(pc, &tape, param2_mode, 2);
 
                 let output = if param1 < param2 { 1 } else { 0 };
 
@@ -174,15 +147,8 @@ pub(crate) fn run_tape(mut tape: Vec<i64>, input: i64) -> Vec<i64> {
                 tape[location] = output;
             }
             Opcode::EQ => {
-                let param1 = match param1_mode {
-                    ParameterMode::Immediate => tape[pc + 1],
-                    ParameterMode::Position => tape[tape[pc + 1] as usize],
-                };
-
-                let param2 = match param2_mode {
-                    ParameterMode::Immediate => tape[pc + 2],
-                    ParameterMode::Position => tape[tape[pc + 2] as usize],
-                };
+                let param1 = get_param(pc, &tape, param1_mode, 1);
+                let param2 = get_param(pc, &tape, param2_mode, 2);
 
                 let output = if param1 == param2 { 1 } else { 0 };
 
@@ -205,6 +171,13 @@ pub(crate) fn parse_opcode(input: i64) -> (Opcode, ParameterMode, ParameterMode,
         ParameterMode::from(input / 1000),
         ParameterMode::from(input / 10000),
     )
+}
+
+pub(crate) fn get_param(pc: usize, tape: &[i64], mode: ParameterMode, offset: usize) -> i64 {
+    match mode {
+        ParameterMode::Immediate => tape[pc + offset],
+        ParameterMode::Position => tape[tape[pc + offset] as usize],
+    }
 }
 
 pub(crate) fn parse_input() -> Vec<i64> {
@@ -237,15 +210,10 @@ mod test {
     #[test]
     fn test_pc_increment() {
         let input = 1002;
-        let expected_output = (
-            Opcode::Mul,
-            ParameterMode::Position,
-            ParameterMode::Immediate,
-            ParameterMode::Position,
-        );
+        let expected_output = 4 as usize;
 
         let actual = parse_opcode(input);
 
-        assert_eq!(4 as usize, actual.0.into());
+        assert_eq!(expected_output, actual.0.into());
     }
 }
