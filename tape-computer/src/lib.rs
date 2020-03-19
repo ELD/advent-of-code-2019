@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 #[derive(Copy, Clone, Debug)]
 pub enum Opcode {
     Add(Mode, Mode, Mode),
@@ -71,8 +73,9 @@ impl From<i64> for Mode {
 pub struct Amp {
     pc: usize,
     relative: i64,
-    output: Option<i64>,
+    pub output: Option<i64>,
     mem: Vec<i64>,
+    pub input_buffer: VecDeque<i64>,
 }
 
 impl Amp {
@@ -82,6 +85,7 @@ impl Amp {
             relative: 0,
             output: None,
             mem,
+            input_buffer: VecDeque::new(),
         }
     }
 
@@ -121,7 +125,9 @@ impl Amp {
                     self.pc += Into::<usize>::into(opcode);
                 }
                 Opcode::Save(m1) => {
-                    if let Some(input) = input.take() {
+                    if let Some(input) = self.input_buffer.pop_front() {
+                        set_value(&mut self.mem, &self.pc + 1, m1, input, self.relative);
+                    } else if let Some(input) = input.take() {
                         set_value(&mut self.mem, &self.pc + 1, m1, input, self.relative);
                     } else {
                         set_value(&mut self.mem, &self.pc + 1, m1, signal, self.relative);
